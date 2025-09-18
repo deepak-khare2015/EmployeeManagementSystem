@@ -35,21 +35,6 @@ namespace EmployeeAPI.Controllers
         //    _uow = uow;
         //}
 
-
-        #endregion
-
-        //Week 3
-        private readonly IEmployeeService _employeeService;
-
-        //Auto Mapper
-        private readonly IMapper _mapper;
-        public EmployeeController(IEmployeeService employeeService, IMapper mapper)
-        {
-            _employeeService = employeeService;
-            _mapper = mapper;
-        }
-
-
         #region WEEK 3 COMMENT - TILL SERVICE LAYER
 
         //// GET: api/employees
@@ -189,6 +174,22 @@ namespace EmployeeAPI.Controllers
 
         #endregion
 
+        #endregion
+
+        private readonly IEmployeeService _employeeService;
+
+        //Auto Mapper
+        private readonly IMapper _mapper;
+
+        private readonly ILogger<EmployeeController> _logger;
+        public EmployeeController(IEmployeeService employeeService, IMapper mapper, ILogger<EmployeeController> logger )
+        {
+            _employeeService = employeeService;
+            _mapper = mapper;
+            _logger = logger;
+        }
+
+
         // GET: api/employees
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetAll()
@@ -210,38 +211,41 @@ namespace EmployeeAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetById(int id)
         {
-         //   try
-         //   {
+            _logger.LogInformation("Getting employee with id {Id}", id);
 
-                if (id <= 0)
+            if (id <= 0)
+            {
+                 _logger.LogError("Invalid id {Id} supplied", id);
                 throw new ArgumentException("Id must be greater than 0");
+            }
 
-                //week 5 - employee service throws not found eception -> Handled by  custome exception middleware
-                //Week 3 Service layer
-                var emp = await _employeeService.GetByIdAsync(id);
 
-                
-                //if (emp == null)
-                  //  return NotFound("Employee not found");
+            // Error: log if not found
+            if (id == 5) // 👈 pretend this id does not exist in DB
+            {
+                _logger.LogError("Employee with id {Id} not found", id);
+                return NotFound("Employee not found");
+            }
+
+
+
+
+
+            //week 5 - employee service throws not found eception -> Handled by  custome exception middleware
+            //Week 3 Service layer
+            var emp = await _employeeService.GetByIdAsync(id);
 
                 //Auto Mapper Entity-> DTO
                 var employeeDTO = _mapper.Map<EmployeeDTO>(emp);
 
-                return Ok(employeeDTO);
-       //     }
-         //   catch(Exception)
-         //   {
-         //       return StatusCode(500, "An unexpected error occurred.");
-        //    }
+            _logger.LogInformation("Employee with id {Id} found successfully", id);
 
+            return Ok(employeeDTO);
         }
 
         [HttpPost]
         public async Task<ActionResult<EmployeeDTO>> Create(EmployeeCreateDTO employeeCreateDTO)
         {
-
-            //if (employeeCreateDTO == null)
-            //    return BadRequest();
 
             //Auto Mapper DTO -> Enitty
             var employee = _mapper.Map<Employee>(employeeCreateDTO);
@@ -267,9 +271,6 @@ namespace EmployeeAPI.Controllers
             //Week 3 Service Layer
             var updateEmployee = await _employeeService.UpdateAsync(employeeUpdateDTO, id);
            
-            //if (updateEmployee == null)
-              //  return NotFound();
-
             //Auto Mapper Entity -> DTO
             var employeeDTO = _mapper.Map<EmployeeDTO>(updateEmployee);
 
