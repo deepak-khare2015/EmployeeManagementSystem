@@ -1,4 +1,5 @@
 ﻿using EmployeeManagement.Application.Exceptions;
+using Serilog;
 using System.Net;
 using System.Text.Json;
 
@@ -22,6 +23,11 @@ namespace EmployeeManagement.API.MIddleware
             }
             catch (Exception ex)
             {
+                //Serilog
+                //Log Exception here using serilog before sending response to client
+                 Log.Error(ex, "An unhandled exception has occurred while executing the request.");
+
+
                 //If any exxception is thrown handle here
                 await HandleExceptionAsync(context, ex);
             }
@@ -33,7 +39,7 @@ namespace EmployeeManagement.API.MIddleware
 
             //Default Response
             var statusCode = (int)HttpStatusCode.InternalServerError;
-            var message = "An unexpected error occoured. PLease try again later";
+            var message = "An unexpected error occoured. Please try again later";
 
             //Handle known exception
             if (exception is NotFoundException)
@@ -50,7 +56,7 @@ namespace EmployeeManagement.API.MIddleware
 
             // Add correlationID in header
             context.Response.Headers["X-Correlation-Id"] = correlationId;
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = "application/json";  // 🔴 Force JSON, ignore Accept
             context.Response.StatusCode = statusCode;
 
             //Convert error object to json (client will get json format response)

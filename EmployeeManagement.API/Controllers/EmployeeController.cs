@@ -7,12 +7,14 @@ using EmployeeManagement.Application.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 
 namespace EmployeeAPI.Controllers
 {
     [ApiController]
     [Route("api/[Controller]")]
+  //  [Produces("application/json")]   // 🔴 Always force JSON in Swagger/OpenAPI
     public class EmployeeController : ControllerBase
     {
         #region Commented 
@@ -181,12 +183,12 @@ namespace EmployeeAPI.Controllers
         //Auto Mapper
         private readonly IMapper _mapper;
 
-        private readonly ILogger<EmployeeController> _logger;
-        public EmployeeController(IEmployeeService employeeService, IMapper mapper, ILogger<EmployeeController> logger )
+        // private readonly ILogger<EmployeeController> _logger; Now using Serilog
+        public EmployeeController(IEmployeeService employeeService, IMapper mapper)
         {
             _employeeService = employeeService;
             _mapper = mapper;
-            _logger = logger;
+            //_logger = logger;
         }
 
 
@@ -194,51 +196,52 @@ namespace EmployeeAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetAll()
         {
-           
-                //week 3 service layer
-                var emp = await _employeeService.GetAllAsync();
-                if(emp ==null)
-                    return NotFound("Employee Not Found");
+            Log.Information("Fetching all employees"); // ✅ Serilog log
 
-                //Auto Mapper Entity -> DTO
-                var employeeDTO = _mapper.Map<IEnumerable<EmployeeDTO>>(emp);
 
-                return Ok(employeeDTO);
-           
+            //week 3 service layer
+            var emp = await _employeeService.GetAllAsync();
+            if (emp == null)
+            {
+                Log.Warning("No employees found"); // ⚠️ Serilog warning
+                return NotFound("Employee Not Found");
+            }
+            //Auto Mapper Entity -> DTO
+            var employeeDTO = _mapper.Map<IEnumerable<EmployeeDTO>>(emp);
+
+            Log.Information("Fetched {Count} employees successfully", employeeDTO.Count()); // ✅ structured log
+            return Ok(employeeDTO);
+
         }
 
         // GET: api/employees/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetById(int id)
         {
-            _logger.LogInformation("Getting employee with id {Id}", id);
+            Log.Information("Getting employee with id {Id}", id);
 
             if (id <= 0)
             {
-                 _logger.LogError("Invalid id {Id} supplied", id);
+                Log.Warning("Invalid employee id {Id}", id);
                 throw new ArgumentException("Id must be greater than 0");
             }
-
 
             // Error: log if not found
             if (id == 5) // 👈 pretend this id does not exist in DB
             {
-                _logger.LogError("Employee with id {Id} not found", id);
+                Log.Error("Employee with id {Id} not found", id);
                 return NotFound("Employee not found");
             }
-
-
-
 
 
             //week 5 - employee service throws not found eception -> Handled by  custome exception middleware
             //Week 3 Service layer
             var emp = await _employeeService.GetByIdAsync(id);
 
-                //Auto Mapper Entity-> DTO
-                var employeeDTO = _mapper.Map<EmployeeDTO>(emp);
+            //Auto Mapper Entity-> DTO
+            var employeeDTO = _mapper.Map<EmployeeDTO>(emp);
 
-            _logger.LogInformation("Employee with id {Id} found successfully", id);
+            Log.Information("Employee with id {Id} found successfully", id);
 
             return Ok(employeeDTO);
         }
@@ -246,6 +249,7 @@ namespace EmployeeAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<EmployeeDTO>> Create(EmployeeCreateDTO employeeCreateDTO)
         {
+            Log.Information("Creating a new employee {@Employee}", employeeCreateDTO);
 
             //Auto Mapper DTO -> Enitty
             var employee = _mapper.Map<Employee>(employeeCreateDTO);
@@ -257,6 +261,8 @@ namespace EmployeeAPI.Controllers
             //Auto Mapper Entity -> DTO
             var employeeDTO = _mapper.Map<EmployeeDTO>(employee);
 
+            Log.Information("Employee created successfully with id {Id}", employeeDTO.Id);
+
             return CreatedAtAction(nameof(GetById), new { id = employeeDTO.Id }, employeeDTO);
 
 
@@ -264,16 +270,21 @@ namespace EmployeeAPI.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<EmployeeDTO>> Update(int id, EmployeeUpdateDTO employeeUpdateDTO)
         {
-            if (id <= 0)
-                throw new ArgumentException("Id must be greater than 0");
+            Log.Information("Updating employee with id {Id}", id);
 
+            if (id <= 0)
+            {
+                Log.Warning("Invalid employee id {Id}", id);
+                throw new ArgumentException("Id must be greater than 0");
+            }
             //Week 5 employee service will throw notfound exception -> handled by custome exception middleware
             //Week 3 Service Layer
             var updateEmployee = await _employeeService.UpdateAsync(employeeUpdateDTO, id);
-           
+
             //Auto Mapper Entity -> DTO
             var employeeDTO = _mapper.Map<EmployeeDTO>(updateEmployee);
 
+            Log.Information("Employee with id {Id} updated successfully", id);
             return Ok(employeeDTO);
         }
 
@@ -281,11 +292,18 @@ namespace EmployeeAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
+            Log.Information("Deleting employee with id {Id}", id);
+
             if (id <= 0)
+            {
+                Log.Warning("Invalid employee id {Id} for delete", id);
                 throw new ArgumentException("Id must be greater than 0");
+            }
 
             //Week 5 employee service will throw notfound exception -> handled by custome exception middleware
             await _employeeService.DeleteAsync(id);
+
+            Log.Information("Employee with id {Id} deleted successfully", id);
             return NoContent();
         }
     }
