@@ -20,7 +20,8 @@ namespace EmployeeDBFirst_Library
         {
             //DbContext
             services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(ConnectionString));
+            options.UseSqlServer(ConnectionString)
+            .EnableSensitiveDataLogging(false)); // If you want to ignore sensitive data in logs
 
             //Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

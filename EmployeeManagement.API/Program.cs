@@ -23,7 +23,6 @@ namespace EmployeeAPI
 
                 // 1️⃣ Read configuration from appsettings.json ("Serilog" section)
                 .ReadFrom.Configuration(builder.Configuration)
-                .Enrich.FromLogContext()  // ✅ Adds context (RequestId, etc.)
                 .CreateLogger();// 5️⃣ Finalize Serilog configuration
 
 
@@ -38,22 +37,6 @@ namespace EmployeeAPI
             var connectionString = builder.Configuration.GetConnectionString("DbConnection");
             builder.Services.AddInfrastructure(connectionString);
 
-            #region Moved into DependencyInjection.cs
-            ////ConnectionString
-            //builder.Services.AddDbContext<AppDbContext>(options =>
-            //{
-            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
-            //});
-
-            ////Register dependencies
-            //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-            //builder.Services.AddScoped<IManagerRepsository, ManagerRepsository>();
-
-            ////Unit of Work
-            //builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            #endregion
-
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -65,7 +48,7 @@ namespace EmployeeAPI
 
 
             //-----------------------------USE REQUEST RESPONSE LOGGING MIDDLEWARE-----------------------
-            app.UseMiddleware<RequestResponseLoggingMiddleware>();  
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

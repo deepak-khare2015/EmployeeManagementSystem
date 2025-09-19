@@ -2,6 +2,7 @@
 using DAL.Entities;
 using EmployeeDBFirst_Library.Repositories;
 using EmployeeManagement.Application.DTOs;
+using EmployeeManagement.Application.Exceptions;
 using EmployeeManagement.Application.Interface;
 using EmployeeManagement.Application.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -230,7 +231,7 @@ namespace EmployeeAPI.Controllers
             if (id == 5) // 👈 pretend this id does not exist in DB
             {
                 Log.Error("Employee with id {Id} not found", id);
-                return NotFound("Employee not found");
+                throw new NotFoundException($"Employee with id {id} not found");
             }
 
 
@@ -275,7 +276,7 @@ namespace EmployeeAPI.Controllers
             if (id <= 0)
             {
                 Log.Warning("Invalid employee id {Id}", id);
-                throw new ArgumentException("Id must be greater than 0");
+                throw new ArgumentException("Invalid employee id");
             }
             //Week 5 employee service will throw notfound exception -> handled by custome exception middleware
             //Week 3 Service Layer
@@ -297,7 +298,7 @@ namespace EmployeeAPI.Controllers
             if (id <= 0)
             {
                 Log.Warning("Invalid employee id {Id} for delete", id);
-                throw new ArgumentException("Id must be greater than 0");
+                throw new ArgumentException("Invalid employee id");
             }
 
             //Week 5 employee service will throw notfound exception -> handled by custome exception middleware
