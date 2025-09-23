@@ -1,9 +1,3 @@
-Perfect Deepak 👍 Now that you’ve got everything working (Repositories, UoW, Service Layer, DTOs, AutoMapper, Validation, Logging, Swagger, Pagination, XML Comments, Postman Collection) — let’s finalize your **README.md** that you can directly paste into your repo root.
-
-This covers **Week 1 → Week 6**, includes CRUD with EF Core (DB-First), XML comments, Swagger, and documentation files.
-
----
-
 # 📘 Employee Management System (EMS) API
 
 A **.NET 8 Web API** project implementing **CRUD operations** on Employees using:
