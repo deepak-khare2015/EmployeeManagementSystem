@@ -258,4 +258,5 @@ Located under `/docs`:
 ## 📸 Swagger Screenshot
 
 Swagger UI with XML comments and CRUD endpoints:
+
 ![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
