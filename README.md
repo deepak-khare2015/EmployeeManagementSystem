@@ -177,6 +177,7 @@ EMS-API/
 * Added **Swagger screenshot** for documentation.
 
 📸 Swagger Screenshot:
+
 ![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
 
 ---
@@ -248,7 +249,7 @@ DELETE /api/employees/43
 
 Located under `/docs`:
 
-* [EMS-Postman-Collection.json](EmployeeManagement.API/docs/EMS-Postman-Collection.json)
+* [EMS-Postman-Collection.json](EmployeeManagement.API/Docs/EMS-Postman-Collection.json)
 
 👉 Import this into Postman → instantly test all endpoints.
 
@@ -257,4 +258,4 @@ Located under `/docs`:
 ## 📸 Swagger Screenshot
 
 Swagger UI with XML comments and CRUD endpoints:
-![Swagger Screenshot](EmployeeManagement.API/docs/swagger-ui.png)
+![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
