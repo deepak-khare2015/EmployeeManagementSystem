@@ -62,53 +62,100 @@ This project is structured as a **portfolio-ready solution** to demonstrate back
 
 ---
 
-## 📂 Project Structure
+## 📂 Final Project Architecture
 
 ```plaintext
 EmployeeManagementSystem/
-│── EmployeeManagement.API/
+│
+├── EmployeeManagement.API/                     # API Layer (Presentation)
 │   ├── Controllers/
-│   │   └── EmployeeController.cs          # CRUD endpoints (XML docs + Serilog)
+│   │   ├── EmployeeController.cs               # CRUD endpoints (XML docs + Serilog)
 │   │   └── ManagerController.cs
 │   ├── Middleware/
-│   │   ├── ExceptionMiddleware.cs         # Global error handling
-│   │   └── RequestResponseLoggingMiddleware.cs
+│   │   ├── ExceptionMiddleware.cs              # Global error handling
+│   │   └── RequestResponseLoggingMiddleware.cs # Request/response logging
 │   ├── Docs/
-│   │   ├── EMS-Postman-Collection.json    # Postman exported collection
-│   │   └── swagger-ui.png                 # Swagger UI screenshot
-│   ├── Logs/                              # Serilog rolling logs
-│   └── Program.cs                         # Startup (Swagger, DI, Logging)
+│   │   ├── EMS-Postman-Collection.json         # Postman exported collection
+│   │   └── swagger-ui.png                      # Swagger UI screenshot
+│   ├── Logs/                                   # Serilog rolling logs
+│   ├── appsettings.json                        # Config (connection string, logging, etc.)
+│   ├── appsettings.Development.json
+│   ├── appsettings.Production.json
+│   ├── EmployeeAPI.http                        # Test requests (VS HTTP client)
+│   └── Program.cs                              # Startup (Swagger, DI, Logging, Middleware)
 │
-│── EmployeeManagement.Application/
+├── EmployeeManagement.Application/             # Application Layer (Business Logic)
 │   ├── DTOs/
-│   │   ├── EmployeeDto.cs
-│   │   ├── EmployeeCreateDto.cs
-│   │   └── EmployeeUpdateDto.cs
-│   ├── Services/
-│   │   └── EmployeeService.cs
+│   │   ├── EmployeeCreateDTO.cs
+│   │   ├── EmployeeDTO.cs
+│   │   └── EmployeeUpdateDTO.cs
+│   ├── Exceptions/
+│   │   └── NotFoundException.cs
+│   ├── Interface/
+│   │   ├── IEmployeeRepository.cs
+│   │   ├── IEmployeeService.cs
+│   │   ├── IGenericRepository.cs
+│   │   ├── IManagerRepository.cs
+│   │   └── IUnitOfWork.cs
 │   ├── Mapping/
-│   │   └── EmployeeProfile.cs
-│   ├── Interface/                         # Repositories & Unit of Work contracts
-│   └── Exceptions/                        # Custom exceptions
+│   │   └── EmployeeProfile.cs                  # AutoMapper profile
+│   └── Services/
+│       └── EmployeeService.cs                  # Business logic
 │
-│── EmployeeManagement.Domain/
+├── EmployeeManagement.Domain/                  # Domain Layer (Entities)
 │   └── Entities/
-│       ├── Employee.cs
+│       ├── Employee.cs                         # EF Core DB-First entity
 │       └── Manager.cs
 │
-│── EmployeeManagement.Infrastructure/
+├── EmployeeManagement.Infrastructure/          # Infrastructure Layer (Data Access)
 │   ├── Data/
-│   │   └── AppDbContext.cs
-│   └── Repositories/
-│       ├── GenericRepository.cs
-│       ├── EmployeeRepository.cs
-│       ├── ManagerRepository.cs
-│       └── UnitOfWork.cs
+│   │   └── AppDbContext.cs                     # EF Core DbContext
+│   ├── Repositories/
+│   │   ├── GenericRepository.cs
+│   │   ├── EmployeeRepository.cs
+│   │   ├── ManagerRepository.cs
+│   │   └── UnitOfWork.cs
+│   └── DependencyInjection.cs                  # DI setup for repositories & UoW
 │
-│── Tests/
-│   └── RepositoryTests.cs                 # xUnit tests (InMemory DB)
-│
-│── README.md                              # Documentation
+└── Tests/                                      # Test Layer
+    └── RepositoryTests.cs                      # xUnit tests (InMemory DB)
+```
+
+---
+
+## 🖼 Architecture Diagram
+
+```plaintext
+                ┌───────────────────────────┐
+                │       Presentation        │
+                │   (EmployeeManagement.API)│
+                │  Controllers + Middleware │
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+                ┌───────────────────────────┐
+                │     Application Layer     │
+                │ DTOs | Services | Mapping │
+                │ Interfaces (IEmployeeSvc) │
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+                ┌───────────────────────────┐
+                │        Domain Layer       │
+                │   Entities (Employee.cs)  │
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+                ┌───────────────────────────┐
+                │     Infrastructure Layer  │
+                │ Repositories | UnitOfWork │
+                │   AppDbContext (EF Core)  │
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+                ┌───────────────────────────┐
+                │        Database (MSSQL)   │
+                └───────────────────────────┘
 ```
 
 ---
@@ -167,6 +214,7 @@ EmployeeManagementSystem/
 * Added **Swagger screenshot** for documentation.
 
 📸 Swagger Screenshot:
+
 ![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
 
 ---
@@ -325,5 +373,4 @@ Located under `/EmployeeManagement.API/Docs`:
 
 👉 Import this into Postman → instantly test all endpoints.
 
-
-👉 Do you want me to also create a **short "Interview Pitch" version (2–3 mins)** that summarizes this whole README in spoken form, so you can use it in interviews without overwhelming details?
+---
