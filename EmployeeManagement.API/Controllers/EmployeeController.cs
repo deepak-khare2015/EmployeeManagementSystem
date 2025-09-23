@@ -13,6 +13,9 @@ using System;
 
 namespace EmployeeAPI.Controllers
 {
+    /// <summary>
+    /// Controller for managing Employee entities CRUD operations.
+    /// </summary>
     [ApiController]
     [Route("api/[Controller]")]
   //  [Produces("application/json")]   // 🔴 Always force JSON in Swagger/OpenAPI
@@ -192,8 +195,19 @@ namespace EmployeeAPI.Controllers
             //_logger = logger;
         }
 
-
-        // GET: api/employees
+        /// <summary>
+        /// Get all employees 
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /api/employees
+        /// 
+        /// Returns a list of employees in DTO format.  
+        /// </remarks>
+        /// <returns>List of EmployeeDTO objects</returns>
+        /// <response code="200">Returns the list of employees</response>
+        /// <response code="404">If no employees are found</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetAll()
         {
@@ -215,7 +229,21 @@ namespace EmployeeAPI.Controllers
 
         }
 
-        // GET: api/employees/5
+
+        /// <summary>
+        /// Get specific employee by Id
+        /// </summary>
+        /// <param name="id"> Employee Id</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /api/employees/5
+        /// 
+        /// </remarks>
+        /// <returns>Employee DTO object if found</returns>
+        /// <response code="200">Returns the employee</response>
+        /// <response code="400">If the id is less than or equal to 0</response>
+        /// <response code="404">If the employee is not found</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetById(int id)
         {
@@ -247,6 +275,24 @@ namespace EmployeeAPI.Controllers
             return Ok(employeeDTO);
         }
 
+        /// <summary>
+        /// Create a new employee.
+        /// </summary>
+        /// <param name="employeeCreateDTO">Employee data for creation</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /api/employees
+        ///     {
+        ///        "name": "Deepak Khare",
+        ///        "position": "Software Engineer",
+        ///        "salary": 15000
+        ///     }
+        /// 
+        /// </remarks>
+        /// <returns>Newly created EmployeeDTO</returns>
+        /// <response code="201">Returns the newly created employee</response>
+        /// <response code="400">If input validation fails</response>
         [HttpPost]
         public async Task<ActionResult<EmployeeDTO>> Create(EmployeeCreateDTO employeeCreateDTO)
         {
@@ -268,6 +314,28 @@ namespace EmployeeAPI.Controllers
 
 
         }
+
+        /// <summary>
+        /// Update an existing employee.
+        /// </summary>
+        /// <param name="id">Employee Id to update</param>
+        /// <param name="employeeUpdateDTO">Updated employee data</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /api/employees/2
+        ///     {
+        ///        "id": 2,
+        ///        "name": "Amith",
+        ///        "position": "Senior Developer",
+        ///        "salary": 70000
+        ///     }
+        /// 
+        /// </remarks>
+        /// <returns>Updated EmployeeDTO object</returns>
+        /// <response code="200">Returns the updated employee</response>
+        /// <response code="400">If the id is invalid</response>
+        /// <response code="404">If the employee does not exist</response>
         [HttpPut("{id}")]
         public async Task<ActionResult<EmployeeDTO>> Update(int id, EmployeeUpdateDTO employeeUpdateDTO)
         {
@@ -289,7 +357,20 @@ namespace EmployeeAPI.Controllers
             return Ok(employeeDTO);
         }
 
-
+        /// <summary>
+        /// Delete an employee by Id.
+        /// </summary>
+        /// <param name="id">Employee Id</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     DELETE /api/employees/2
+        /// 
+        /// </remarks>
+        /// <returns>No content</returns>
+        /// <response code="204">Employee deleted successfully</response>
+        /// <response code="400">If the id is invalid</response>
+        /// <response code="404">If the employee is not found</response>
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

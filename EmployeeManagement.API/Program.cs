@@ -1,11 +1,11 @@
-﻿
-using DAL.Entities;
-using EmployeeDBFirst_Library;
-using EmployeeDBFirst_Library.Repositories;
+﻿using EmployeeDBFirst_Library;
 using EmployeeManagement.API.MIddleware;
-using EmployeeManagement.Application.Interface;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Reflection; //Needed fo assembly
+using System.IO;  //Needed for path
+using Microsoft.OpenApi.Models; //Needed for OpenApiInfo
+
 
 
 namespace EmployeeAPI
@@ -16,19 +16,27 @@ namespace EmployeeAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            #region Serilog Setup
+
             // --------------Serilog Setup----------------
 
             // Configure Serilog before app.Build() so ALL logs (even startup errors) go through Serilog
             Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)   // ⬅️ Reads from appsettings.json "Serilog" section
+                .Enrich.FromLogContext()                         // ⬅️ Adds CorrelationId, RequestId, etc.
+                .CreateLogger();                                 // ⬅️ Finalize logger
 
-                // 1️⃣ Read configuration from appsettings.json ("Serilog" section)
-                .ReadFrom.Configuration(builder.Configuration)
-                .CreateLogger();// 5️⃣ Finalize Serilog configuration
-
-
+            // Load correct config automatically (Development/Production)
             // Replace built-in .NET logging with Serilog
-            builder.Host.UseSerilog();
+            // Use Serilog with environment-aware config if you want to switch (prod -> dev) without changing appsettings.json
+            builder.Host.UseSerilog((context, services, configuration) =>
+            {
+                configuration.ReadFrom.Configuration(context.Configuration)
+                              .ReadFrom.Services(services)
+                              .Enrich.FromLogContext();
 
+            });
+            #endregion 
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -39,30 +47,55 @@ namespace EmployeeAPI
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
+            //builder.Services.AddSwaggerGen();
+
+            #region Swagger with XML comments
+            //-------------Swagger with XML comments-------------------------
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Employee Management API",
+                    Description = "An ASP.NET Core Web API for managing Employees",
+
+                });
+
+
+                var xmlfiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly);
+                foreach (var xmlfile in xmlfiles)
+                {
+                    options.IncludeXmlComments(xmlfile);
+                }
+            });
+
+            #endregion
             var app = builder.Build();
 
-            //-----------------------------USE EXCEPTION MIDDLEWARE-----------------------
-            app.UseMiddleware<ExceptionMiddleware>();
 
 
-            //-----------------------------USE REQUEST RESPONSE LOGGING MIDDLEWARE-----------------------
-            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+                //-----------------------------USE EXCEPTION MIDDLEWARE-----------------------
+                app.UseMiddleware<ExceptionMiddleware>();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+
+                //-----------------------------USE REQUEST RESPONSE LOGGING MIDDLEWARE-----------------------
+                app.UseMiddleware<RequestResponseLoggingMiddleware>();
+
+                //Configure the HTTP request pipeline.
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
+                }
+
+
+                app.UseAuthorization();
+
+
+                app.MapControllers();
+
+                app.Run();
             }
-
-            app.UseAuthorization();
-
-
-            app.MapControllers();
-
-            app.Run();
-        }
     }
-}
+    }
