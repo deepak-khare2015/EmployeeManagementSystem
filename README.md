@@ -32,7 +32,7 @@ This project is structured as a **portfolio-ready solution** to demonstrate back
 1. Clone the repo:
 
    ```bash
-   git clone https://github.com/yourusername/ems-api.git
+   git clone [(https://github.com/deepak-khare2015/EmployeeManagementSystem.git)]
    cd ems-api
    ```
 
