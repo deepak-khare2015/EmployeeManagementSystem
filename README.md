@@ -248,7 +248,7 @@ DELETE /api/employees/43
 
 Located under `/docs`:
 
-* [EMS-Postman-Collection.json](docs/EMS-Postman-Collection.json)
+* [EMS-Postman-Collection.json](EmployeeManagement.API/docs/EMS-Postman-Collection.json)
 
 👉 Import this into Postman → instantly test all endpoints.
 
@@ -257,23 +257,4 @@ Located under `/docs`:
 ## 📸 Swagger Screenshot
 
 Swagger UI with XML comments and CRUD endpoints:
-![Swagger Screenshot](docs/swagger-ui.png)
-
----
-
-## 🏆 Interview Highlights
-
-* **DB-First + Repository + UoW** → flexible & testable DAL.
-* **Service Layer** → thin controllers, SRP applied.
-* **DTOs + AutoMapper + Validation** → secure data contracts.
-* **Middleware + Serilog** → consistent errors, structured logs.
-* **Swagger + Pagination + Postman** → professional API usability.
-
----
-
-✅ **Phase 1 (Weeks 1–6) Complete** → EMS API is now **cleanly layered, documented, testable, and interview-ready**.
-
----
-
-Deepak, this README.md is now **final, complete, and GitHub-ready**.
-Would you like me to also prepare a **2-minute spoken “project explanation pitch”** so you can confidently explain this in interviews?
+![Swagger Screenshot](EmployeeManagement.API/docs/swagger-ui.png)
