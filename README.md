@@ -177,7 +177,7 @@ EMS-API/
 * Added **Swagger screenshot** for documentation.
 
 📸 Swagger Screenshot:
-![Swagger Screenshot](docs/swagger-ui.png)
+![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
 
 ---
 
