@@ -32,8 +32,8 @@ This project is structured as a **portfolio-ready solution** to demonstrate back
 1. Clone the repo:
 
    ```bash
-   git clone [(https://github.com/deepak-khare2015/EmployeeManagementSystem.git)]
-   cd ems-api
+   git clone https://github.com/deepak-khare2015/EmployeeManagementSystem.git
+   cd EmployeeManagementSystem
    ```
 
 2. Restore dependencies:
@@ -51,7 +51,7 @@ This project is structured as a **portfolio-ready solution** to demonstrate back
 4. Run the API:
 
    ```bash
-   dotnet run
+   dotnet run --project EmployeeManagement.API
    ```
 
 5. Open Swagger UI:
@@ -65,56 +65,50 @@ This project is structured as a **portfolio-ready solution** to demonstrate back
 ## 📂 Project Structure
 
 ```plaintext
-EMS-API/
-│── Controllers/
-│   └── EmployeeController.cs          # API endpoints (CRUD + XML docs + Serilog)
+EmployeeManagementSystem/
+│── EmployeeManagement.API/
+│   ├── Controllers/
+│   │   └── EmployeeController.cs          # CRUD endpoints (XML docs + Serilog)
+│   │   └── ManagerController.cs
+│   ├── Middleware/
+│   │   ├── ExceptionMiddleware.cs         # Global error handling
+│   │   └── RequestResponseLoggingMiddleware.cs
+│   ├── Docs/
+│   │   ├── EMS-Postman-Collection.json    # Postman exported collection
+│   │   └── swagger-ui.png                 # Swagger UI screenshot
+│   ├── Logs/                              # Serilog rolling logs
+│   └── Program.cs                         # Startup (Swagger, DI, Logging)
 │
-│── DAL/
+│── EmployeeManagement.Application/
+│   ├── DTOs/
+│   │   ├── EmployeeDto.cs
+│   │   ├── EmployeeCreateDto.cs
+│   │   └── EmployeeUpdateDto.cs
+│   ├── Services/
+│   │   └── EmployeeService.cs
+│   ├── Mapping/
+│   │   └── EmployeeProfile.cs
+│   ├── Interface/                         # Repositories & Unit of Work contracts
+│   └── Exceptions/                        # Custom exceptions
+│
+│── EmployeeManagement.Domain/
+│   └── Entities/
+│       ├── Employee.cs
+│       └── Manager.cs
+│
+│── EmployeeManagement.Infrastructure/
+│   ├── Data/
+│   │   └── AppDbContext.cs
 │   └── Repositories/
-│       ├── IRepository.cs             # Generic repository interface
-│       ├── Repository.cs              # Generic repository implementation
-│       ├── IEmployeeRepository.cs     # Employee-specific repo interface
-│       └── EmployeeRepository.cs      # Employee repo implementation
-│
-│── Infrastructure/
-│   └── UnitOfWork.cs                  # Unit of Work implementation
-│
-│── Services/
-│   ├── IEmployeeService.cs            # Employee service contract
-│   └── EmployeeService.cs             # Business logic for employees
-│
-│── DTOs/
-│   ├── EmployeeDto.cs                 # Read DTO
-│   ├── EmployeeCreateDto.cs           # Create DTO
-│   └── EmployeeUpdateDto.cs           # Update DTO
-│
-│── Validators/
-│   └── EmployeeValidator.cs           # FluentValidation rules
-│
-│── Mappings/
-│   └── AutoMapperProfile.cs           # AutoMapper profile for DTO ↔ Entity
-│
-│── Middleware/
-│   └── ExceptionMiddleware.cs         # Global error handling
-│
-│── Models/
-│   ├── Employee.cs                    # EF Core DB-First entity
-│   └── PagedResult.cs                 # Pagination response wrapper
-│
-│── Logs/
-│   └── log-.txt                       # Serilog rolling logs
+│       ├── GenericRepository.cs
+│       ├── EmployeeRepository.cs
+│       ├── ManagerRepository.cs
+│       └── UnitOfWork.cs
 │
 │── Tests/
-│   └── RepositoryTests.cs             # xUnit tests (InMemory DB)
+│   └── RepositoryTests.cs                 # xUnit tests (InMemory DB)
 │
-│── docs/
-│   ├── EMS-Postman-Collection.json    # Postman exported collection
-│   └── swagger-ui.png                 # Swagger UI screenshot
-│
-│── Program.cs                         # Startup (Swagger, DI, Logging, Middleware)
-│── appsettings.json                   # Config (conn string, logging, etc.)
-│── EMS-API.csproj                     # Project file
-│── README.md                          # Documentation
+│── README.md                              # Documentation
 ```
 
 ---
@@ -134,8 +128,7 @@ EMS-API/
 
 * Added `IUnitOfWork` + `UnitOfWork`.
 * Centralized transaction commits.
-
-💬 **Talking Point:** Scoped lifetime ensures consistency per request.
+  💬 **Talking Point:** Scoped lifetime ensures consistency per request.
 
 ---
 
@@ -143,8 +136,7 @@ EMS-API/
 
 * Added `IEmployeeService` + `EmployeeService`.
 * Controllers now delegate to service layer.
-
-💬 **Talking Point:** Thin controllers, SRP, DI best practices.
+  💬 **Talking Point:** Thin controllers, SRP, DI best practices.
 
 ---
 
@@ -153,8 +145,7 @@ EMS-API/
 * Added `EmployeeDto`, `EmployeeCreateDto`, `EmployeeUpdateDto`.
 * Configured AutoMapper mapping profiles.
 * Added FluentValidation rules for Create/Update.
-
-💬 **Talking Point:** DTOs secure contracts, validators ensure integrity.
+  💬 **Talking Point:** DTOs secure contracts, validators ensure integrity.
 
 ---
 
@@ -163,8 +154,7 @@ EMS-API/
 * Implemented **ExceptionMiddleware** for consistent error responses.
 * Added **Serilog** with console/file sinks.
 * Structured logging in controllers with `Log.Information`, `Log.Warning`, `Log.Error`.
-
-💬 **Talking Point:** Logs are structured and correlation-ready.
+  💬 **Talking Point:** Logs are structured and correlation-ready.
 
 ---
 
@@ -177,20 +167,19 @@ EMS-API/
 * Added **Swagger screenshot** for documentation.
 
 📸 Swagger Screenshot:
-
 ![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
 
 ---
 
 ## 🔹 Sample Requests & Responses
 
-### GET Employees (Paginated)
+### 1. GET All Employees (Paginated)
 
 ```
-GET /api/employees?pageNumber=1&pageSize=2
+GET /api/Employee?pageNumber=1&pageSize=2
 ```
 
-**Response**
+**Response (200 OK):**
 
 ```json
 {
@@ -204,13 +193,44 @@ GET /api/employees?pageNumber=1&pageSize=2
 }
 ```
 
-### POST Employee
+---
+
+### 2. GET Employee by Id
 
 ```
-POST /api/employees
+GET /api/Employee/1
 ```
 
-**Request**
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "position": "Manager",
+  "salary": 85000
+}
+```
+
+**Response (404 Not Found):**
+
+```json
+{
+  "error": "Employee with id 99 not found",
+  "statusCode": 404,
+  "traceId": "00-abc123xyz"
+}
+```
+
+---
+
+### 3. POST Create Employee
+
+```
+POST /api/Employee
+```
+
+**Request:**
 
 ```json
 {
@@ -220,7 +240,7 @@ POST /api/employees
 }
 ```
 
-**Response (201 Created)**
+**Response (201 Created):**
 
 ```json
 {
@@ -231,32 +251,79 @@ POST /api/employees
 }
 ```
 
-### DELETE Employee
+---
+
+### 4. PUT Update Employee
 
 ```
-DELETE /api/employees/43
+PUT /api/Employee/2
 ```
 
-**Response**
+**Request:**
+
+```json
+{
+  "id": 2,
+  "name": "Amith",
+  "position": "Senior Developer",
+  "salary": 70000
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 2,
+  "name": "Amith",
+  "position": "Senior Developer",
+  "salary": 70000
+}
+```
+
+**Response (404 Not Found):**
+
+```json
+{
+  "error": "Employee with id 2 not found",
+  "statusCode": 404,
+  "traceId": "00-abc123xyz"
+}
+```
+
+---
+
+### 5. DELETE Employee
 
 ```
-204 No Content
+DELETE /api/Employee/43
+```
+
+**Response (204 No Content):**
+
+```
+(no body returned)
+```
+
+**Response (400 Bad Request):**
+
+```json
+{
+  "error": "Invalid employee id",
+  "statusCode": 400,
+  "traceId": "00-abc123xyz"
+}
 ```
 
 ---
 
 ## 📁 Postman Collection
 
-Located under `/docs`:
+Located under `/EmployeeManagement.API/Docs`:
 
 * [EMS-Postman-Collection.json](EmployeeManagement.API/Docs/EMS-Postman-Collection.json)
 
 👉 Import this into Postman → instantly test all endpoints.
 
----
 
-## 📸 Swagger Screenshot
-
-Swagger UI with XML comments and CRUD endpoints:
-
-![Swagger Screenshot](EmployeeManagement.API/Docs/swagger-ui.png)
+👉 Do you want me to also create a **short "Interview Pitch" version (2–3 mins)** that summarizes this whole README in spoken form, so you can use it in interviews without overwhelming details?
