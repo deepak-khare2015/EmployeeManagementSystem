@@ -18,10 +18,7 @@ namespace EmployeeManagement.API.MIddleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // 1️⃣ Generate or reuse CorrelationId (unique per request)
-            //var correlationId = context.Items.TryGetValue("CorrelationId", out var cidObj)
-            //    ? cidObj?.ToString()
-            //    : Guid.NewGuid().ToString();
+
 
             var correlationId = context.Request.Headers.TryGetValue("X-Correlation-Id", out var cidObj)
                 ? cidObj.ToString()
@@ -29,7 +26,7 @@ namespace EmployeeManagement.API.MIddleware
                                                 // 👉 In production, many teams prefer a shorter format (no dashes) to make it easier to read/search.
 
             // Save in HttpContext.Items so controllers/services can access it
-            context.Items["CorrelationId"] = correlationId;
+            context.Items["CorrelationId"] = correlationId; // Store in HttpCoontext for later retrievals
 
 
             // 2️⃣ Add CorrelationId to response header so client also gets it
