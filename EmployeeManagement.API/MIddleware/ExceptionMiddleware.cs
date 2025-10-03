@@ -25,7 +25,7 @@ namespace EmployeeManagement.API.MIddleware
             {
                 //Serilog
                 //Log Exception here using serilog before sending response to client
-                 Log.Error(ex, "An unhandled exception has occurred while executing the request.");
+                Log.Error(ex, "An unhandled exception has occurred while executing the request.");
 
 
                 //If any exxception is thrown handle here
@@ -33,9 +33,13 @@ namespace EmployeeManagement.API.MIddleware
             }
         }
 
-        private Task  HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var correlationId = Guid.NewGuid().ToString();
+            //Getting correlationId from HttpContext (set in RequestResponseLoggingMiddleware)
+            var correlationId = context.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
+            
+            // Save in HttpContext so other middlewares can reuse it
+            context.Items["CorrelationId"] = correlationId;
 
             //Default Response
             var statusCode = (int)HttpStatusCode.InternalServerError;
@@ -62,14 +66,14 @@ namespace EmployeeManagement.API.MIddleware
             //Convert error object to json (client will get json format response)
             var payload = JsonSerializer.Serialize(new
             {
-                correlationId ,
+                correlationId,
                 statusCode,
                 message
 
             });
 
             return context.Response.WriteAsync(payload);
-                
+
         }
     }
 }

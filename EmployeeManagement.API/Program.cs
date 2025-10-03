@@ -1,10 +1,14 @@
 ﻿using EmployeeDBFirst_Library;
 using EmployeeManagement.API.MIddleware;
+using EmployeeManagement.Application.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
-using System.Reflection; //Needed fo assembly
-using System.IO;  //Needed for path
 using Microsoft.OpenApi.Models; //Needed for OpenApiInfo
+using Serilog;
+using System.IO;  //Needed for path
+using System.Reflection; //Needed fo assembly
 
 
 
@@ -39,7 +43,41 @@ namespace EmployeeAPI
             #endregion 
 
             // Add services to the container.
-            builder.Services.AddControllers();
+
+            //builder.Services.AddControllers();
+
+            //Fluent validation custom error response format middleware
+            builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Intercept validation before ASP.NET Core writes ProblemDetails
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            // Collect validation errors into a list
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .Select(e => new
+                {
+                    field = e.Key,
+                    messages = e.Value.Errors.Select(err => err.ErrorMessage).ToArray()
+                }).ToList();
+
+            // Save errors in HttpContext so our ValidationMiddleware can handle it
+            context.HttpContext.Items["ModelStateErrors"] = errors;
+
+            // Return bare 400 with NO BODY — this prevents ProblemDetails from being written
+            return new EmptyResult(); // ⚡ instead of BadRequestResult
+        };
+    });
+
+           
+
+            //Fluent validation
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<EmployeeCreateDTOValidator>();
+
+
+
 
             //-------------Add Dependency Injection file-------------------------
             var connectionString = builder.Configuration.GetConnectionString("DbConnection");
@@ -75,27 +113,31 @@ namespace EmployeeAPI
 
 
 
-                //-----------------------------USE EXCEPTION MIDDLEWARE-----------------------
-                app.UseMiddleware<ExceptionMiddleware>();
+            //-----------------------------USE EXCEPTION MIDDLEWARE-----------------------
+            app.UseMiddleware<ExceptionMiddleware>();
 
+            //-----------------------------USE REQUEST RESPONSE LOGGING MIDDLEWARE-----------------------
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
-                //-----------------------------USE REQUEST RESPONSE LOGGING MIDDLEWARE-----------------------
-                app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            //-----------------------------USE VALIDATOR MIDDLEWARE TO ADD FLUENT VALIDATION LOG IN GENERIC CUSTOME FORMAT-----------------------
+            app.UseMiddleware<ValidationMiddleware>();
 
-                //Configure the HTTP request pipeline.
-                if (app.Environment.IsDevelopment())
-                {
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
-                }
+           
 
-
-                app.UseAuthorization();
-
-
-                app.MapControllers();
-
-                app.Run();
+            //Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
+
+
+            app.UseAuthorization();
+
+
+            app.MapControllers();
+
+            app.Run();
+        }
     }
-    }
+}
