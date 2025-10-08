@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using DAL.Entities;
 using EmployeeManagement.Application.DTOs;
 using System;
@@ -15,6 +16,9 @@ namespace EmployeeManagement.Application.Mapping
         {
             //Read Operation
             //Entities -> DTO
+            CreateMap<Employee, EmployeeDTO>()
+                .ForMember(dest => dest.Salary, opt => opt.Ignore());// Ignore Salary for output DTO
+
             CreateMap<Employee, EmployeeDTO>()
                 .ForMember(dest => dest.Salary, opt => opt.Ignore());// Ignore Salary for output DTO
 

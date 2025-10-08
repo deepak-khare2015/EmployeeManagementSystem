@@ -17,6 +17,8 @@ namespace EmployeeManagement.Application.Interface
         Task<Employee> UpdateAsync(EmployeeUpdateDTO employeeUpdateDTO , int id);
         Task<bool> DeleteAsync(int id);
 
+
+        Task<EmployeeStatusDTO> EmployeeStatus(int empId, string approvalStatus);
         
        
        

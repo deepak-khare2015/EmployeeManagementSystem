@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DAL.Entities;                                     // Employee entity
+using EmployeeDBFirst_Library.Factories;
 using EmployeeManagement.Application.DTOs;              // DTOs for Employee updates
 using EmployeeManagement.Application.Exceptions;        // Custom exceptions
 using EmployeeManagement.Application.Interface;         // IEmployeeService, IUnitOfWork
@@ -18,11 +19,14 @@ namespace EmployeeManagement.Application.Services
     {
         private readonly IUnitOfWork _uow;   // Unit of Work to manage repositories & save changes
         private readonly IMapper _mapper;    // AutoMapper for mapping DTOs to Entities
+        private readonly NotificationFactory _notificationFactory; // Factory for creating notifications
 
-        public EmployeeService(IUnitOfWork uow, IMapper mapper)
+
+        public EmployeeService(IUnitOfWork uow, IMapper mapper , NotificationFactory notificationFactory)
         {
             _uow = uow;
             _mapper = mapper;
+            _notificationFactory = notificationFactory;
         }
 
         // ---------------------- GET ALL ----------------------
@@ -107,5 +111,41 @@ namespace EmployeeManagement.Application.Services
             Log.Information("Employee with id {Id} updated successfully", id);
             return existing;
         }
+
+
+        //-------------------- GetEmployeeStatus--------------------------
+        public async Task<EmployeeStatusDTO> EmployeeStatus(int empId, string approvalStatus)
+        {
+
+            if (empId <= 0)
+            {
+                Log.Warning("Invalid employee id {emoId} for the status", empId);
+                throw new ArgumentException("Invalid employee id");
+            }
+            var exitingemp = await  _uow.Employees.GetByIdAsync(empId);
+            if (exitingemp == null)
+            {
+                Log.Warning("Employee with id {empId} not found for the status", empId);
+                throw new NotFoundException($"Employee with id {empId} not found");
+
+            }
+
+            //Send Notification to Employee about the status
+            var notification = _notificationFactory.CreateNotification();
+            notification.SendMessage($"Your status is {approvalStatus}");
+
+            var employeeStatus = new EmployeeStatusDTO
+            {   Id = exitingemp.Id,
+                Name = exitingemp.Name,
+                Status = approvalStatus
+            };
+
+
+            return employeeStatus;
+
+
+        }
+
+       
     }
 }

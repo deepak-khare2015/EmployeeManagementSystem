@@ -81,7 +81,12 @@ namespace EmployeeAPI
 
             //-------------Add Dependency Injection file-------------------------
             var connectionString = builder.Configuration.GetConnectionString("DbConnection");
-            builder.Services.AddInfrastructure(connectionString);
+
+            //-------------Read Factory settings from appsettings.json Email/SMS-------------------------
+            var factoryConfig = builder.Configuration.GetSection("FactorySettings");
+            var notificationType = factoryConfig["NotificationType"];
+
+            builder.Services.AddInfrastructure(connectionString, notificationType);
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
