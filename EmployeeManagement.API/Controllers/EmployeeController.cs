@@ -388,5 +388,52 @@ namespace EmployeeAPI.Controllers
             Log.Information("Employee with id {Id} deleted successfully", id);
             return NoContent();
         }
+
+
+        /// <summary>
+        ///     Get employee details by Id and approval status.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="NotFoundException"></exception>
+        [HttpGet("status/{id}")]
+        public async Task<ActionResult<EmployeeStatusDTO>> EmployeeStatus(int id, [FromQuery] string status)
+        {
+            Log.Information("Getting employee with id {Id}", id);
+
+            if (id <= 0)
+            {
+                Log.Warning("Invalid employee id {Id}", id);
+                throw new ArgumentException("Id must be greater than 0");
+            }
+
+            // Error: log if not found
+            if (id == 5) // 👈 pretend this id does not exist in DB
+            {
+                Log.Error("Employee with id {Id} not found", id);
+                throw new NotFoundException($"Employee with id {id} not found");
+            }
+            if(status == null)
+            {
+                Log.Warning("Approval status is null for employee id {Id}", id);
+                throw new ArgumentException("Approval status cannot be null");
+            }
+
+
+            //week 5 - employee service throws not found eception -> Handled by  custome exception middleware
+            //Week 3 Service layer
+            var statusResult = await _employeeService.EmployeeStatus(id, status);
+
+            //Auto Mapper Entity-> DTO
+            var employeeStatusDTO = _mapper.Map<EmployeeStatusDTO>(statusResult);
+
+            Log.Information("Employee with id {Id} found successfully", id);
+
+            return Ok(employeeStatusDTO);
+        }
     }
+
+
 }

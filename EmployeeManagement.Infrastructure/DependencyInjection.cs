@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using EmployeeDBFirst_Library.Factories;
 using EmployeeDBFirst_Library.Repositories;
 using EmployeeManagement.Application.Interface;
 using EmployeeManagement.Application.Mapping;
@@ -16,7 +17,7 @@ namespace EmployeeDBFirst_Library
     public static class DependencyInjection
     {
 
-        public static IServiceCollection AddInfrastructure (this IServiceCollection services, string ConnectionString)
+        public static IServiceCollection AddInfrastructure (this IServiceCollection services, string ConnectionString, string notificationType)
         {
             //DbContext
             services.AddDbContext<AppDbContext>(options =>
@@ -28,7 +29,16 @@ namespace EmployeeDBFirst_Library
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<IManagerRepsository, ManagerRepsository>();
             services.AddScoped<IUnitOfWork,UnitOfWork>();
+
+            if(notificationType == "Email")
+                services.AddScoped<NotificationFactory, EmailNotificationFactory>();
+            else if (notificationType == "SMS")
+                services.AddScoped<NotificationFactory, SMSNotificationFactory>();
+            else
+                services.AddScoped<NotificationFactory, EmailNotificationFactory>();// You can switch to SmsNotificationFactory here if needed 
+            
             services.AddScoped<IEmployeeService, EmployeeService>();
+           
 
             //Register Automapper
             services.AddAutoMapper(typeof(EmployeeProfile)); 
